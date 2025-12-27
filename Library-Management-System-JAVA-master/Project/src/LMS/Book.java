@@ -63,44 +63,48 @@ public class Book {
     }
     
     // changign Info of a Book
-    public void changeBookInfo() throws IOException
-    {
-        Scanner scanner = new Scanner(System.in);
-        String input;
-        
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        
-        System.out.println("\nUpdate Author? (y/n)");
-        input = scanner.next();
-        
-        if(input.equals("y"))
-        {
-            System.out.println("\nEnter new Author: ");
-            author = reader.readLine();
-        }
+    public class BookUpdater {
 
-        System.out.println("\nUpdate Subject? (y/n)");
-        input = scanner.next();
-        
-        if(input.equals("y"))
-        {
-            System.out.println("\nEnter new Subject: ");
-            subject = reader.readLine();
-        }
+        public void changeBookInfo(Book book) throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.println("\nUpdate Title? (y/n)");
-        input = scanner.next();
-        
-        if(input.equals("y"))
-        {
-            System.out.println("\nEnter new Title: ");
-            title = reader.readLine();
-        }        
-        
-        System.out.println("\nBook is successfully updated.");
-        
+            System.out.print("\nUpdate Author? (y/n): ");
+            String input = reader.readLine();
+            if (input.equalsIgnoreCase("y")) {
+                System.out.print("Enter new Author: ");
+                book.setAuthor(reader.readLine());
+            }
+
+            System.out.print("\nUpdate Subject? (y/n): ");
+            input = reader.readLine();
+            if (input.equalsIgnoreCase("y")) {
+                System.out.print("Enter new Subject: ");
+                book.setSubject(reader.readLine());
+            }
+
+            System.out.print("\nUpdate Title? (y/n): ");
+            input = reader.readLine();
+            if (input.equalsIgnoreCase("y")) {
+                System.out.print("Enter new Title: ");
+                book.setTitle(reader.readLine());
+            }
+
+            System.out.println("\nBook is successfully updated.");
+        }
     }
-    
+
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
     /*------------Getter FUNCs.---------*/
     
     public String getTitle()
@@ -311,7 +315,7 @@ public class Book {
         
         borrower.removeBorrowedBook(l);
         
-        l.payFine();
+        l.FineService();
         
         System.out.println("\nThe book " + l.getBook().getTitle() + " is successfully returned by " + borrower.getName() + ".");
         System.out.println("\nReceived by: " + staff.getName());            

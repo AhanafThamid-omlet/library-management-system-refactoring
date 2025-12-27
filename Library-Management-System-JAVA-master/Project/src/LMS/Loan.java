@@ -90,59 +90,37 @@ public class Loan
 
 
     //Computes fine for a particular loan only
-    public double computeFine1()
-    {
+    public class FineService {
+        public double computeFine(Loan loan) {
+            if (loan.getFineStatus()) return 0;
 
-        //-----------Computing Fine-----------        
-        double totalFine = 0;
-        
-        if (!finePaid)
-        {    
-            Date iDate = issuedDate;
-            Date rDate = new Date();                
+            Date issueDate = loan.getIssuedDate();
+            Date today = new Date();
+            long days = ChronoUnit.DAYS.between(today.toInstant(), issueDate.toInstant());
+            days = 0 - days;
+            days -= Library.getInstance().book_return_deadline;
 
-            long days =  ChronoUnit.DAYS.between(rDate.toInstant(), iDate.toInstant());        
-            days=0-days;
-
-            days = days - Library.getInstance().book_return_deadline;
-
-            if(days>0)
-                totalFine = days * Library.getInstance().per_day_fine;
-            else
-                totalFine=0;
+            return (days > 0) ? days * Library.getInstance().per_day_fine : 0;
         }
-        return totalFine;
-    }
-    
-    
-    public void payFine()
-    {
-        //-----------Computing Fine-----------//
-        
-        double totalFine = computeFine1();
-                
-        if (totalFine > 0)
-        {
-            System.out.println("\nTotal Fine generated: Rs " + totalFine);
 
-            System.out.println("Do you want to pay? (y/n)");
-            
-            Scanner input = new Scanner(System.in); 
-            
-            String choice = input.next();
-            
-            if(choice.equals("y") || choice.equals("Y"))
-                finePaid = true; 
-            
-            if(choice.equals("n") || choice.equals("N"))
-                finePaid = false; 
+        public void processFinePayment(Loan loan) {
+            double totalFine = computeFine(loan);
+
+            if (totalFine > 0) {
+                System.out.println("\nTotal Fine generated: Rs " + totalFine);
+                System.out.println("Do you want to pay? (y/n)");
+                Scanner input = new Scanner(System.in);
+                String choice = input.next();
+
+                loan.setFineStatus(choice.equalsIgnoreCase("y"));
+            }
+            else {
+                System.out.println("\nNo fine is generated.");
+                loan.setFineStatus(true);
+            }
         }
-        else
-        {
-            System.out.println("\nNo fine is generated.");
-            finePaid = true;
-        }        
     }
+
 
 
     // Extending issued Date 

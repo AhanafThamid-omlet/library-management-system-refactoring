@@ -14,9 +14,9 @@ public class Borrower extends Person
     public Borrower(int id,String name, String address, int phoneNum) // para. cons
     {
         super(id,name,address,phoneNum);
-        
+
         borrowedBooks = new ArrayList();
-        onHoldBooks = new ArrayList();        
+        onHoldBooks = new ArrayList();
     }
 
     
@@ -75,33 +75,55 @@ public class Borrower extends Person
     }
    
     // Updating Borrower's Info
-    public void updateBorrowerInfo() throws IOException
-    {
-        String choice;
-        
-        Scanner sc = new Scanner(System.in);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        
-        
-        System.out.println("\nDo you want to update " + getName() + "'s Name ? (y/n)");  
-        choice = sc.next();
-
-        updateBorrowerName(choice, reader);
-
-
-        System.out.println("\nDo you want to update " + getName() + "'s Address ? (y/n)");  
-        choice = sc.next();
-
-        updateBorrowerAddress(choice, reader);
-
-        System.out.println("\nDo you want to update " + getName() + "'s Phone Number ? (y/n)");  
-        choice = sc.next();
-
-        updateBorrowerPhoneNumber(choice, sc);
-
-        System.out.println("\nBorrower is successfully updated.");
-        
+    interface BorrowerInputHandler {
+        String askYesNo(String question);
+        String readLine(String prompt);
+        int readInt(String prompt);
     }
+    class ConsoleInputHandler implements BorrowerInputHandler {
+        private final Scanner sc = new Scanner(System.in);
+        private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        public String askYesNo(String question) {
+            System.out.println(question + " (y/n)");
+            return sc.next();
+        }
+        public String readLine(String prompt) {
+            try {
+                System.out.println(prompt);
+                return reader.readLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        public int readInt(String prompt) {
+            System.out.println(prompt);
+            return sc.nextInt();
+        }
+    }
+    public class Borrower extends Person {
+        private BorrowerInputHandler inputHandler;
+        public Borrower(int id, String name, String address, int phoneNum, BorrowerInputHandler inputHandler) {
+            super(id, name, address, phoneNum);
+            this.inputHandler = inputHandler;
+            borrowedBooks = new ArrayList<>();
+            onHoldBooks = new ArrayList<>();
+        }
+        public void updateBorrowerInfo() {
+            String choice;
+            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Name?");
+            if (choice.equals("y")) setName(inputHandler.readLine("Type New Name:"));
+
+            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Address?");
+            if (choice.equals("y")) setAddress(inputHandler.readLine("Type New Address:"));
+
+            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Phone Number?");
+            if (choice.equals("y")) setPhone(inputHandler.readInt("Type New Phone Number:"));
+
+            System.out.println("\nBorrower is successfully updated.");
+        }
+    }
+
 
     private void updateBorrowerPhoneNumber(String choice, Scanner sc) {
         if(choice.equals("y"))

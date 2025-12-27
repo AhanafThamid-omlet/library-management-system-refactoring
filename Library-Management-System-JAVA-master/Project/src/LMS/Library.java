@@ -400,7 +400,7 @@ public class Library {
             
             if ((l.getBorrower() == borrower))
             {
-                per_loan_fine = l.computeFine1();
+                per_loan_fine = l.FineService();
                 System.out.print(i + "-" + "\t\t" + loans.get(i).getBook().getTitle() + "\t\t\t" + loans.get(i).getBorrower().getName() + "\t\t" + loans.get(i).getIssuedDate() +  "\t\t\t" + loans.get(i).getReturnDate() + "\t\t\t\t" + per_loan_fine  + "\n");                
                 
                 totalFine += per_loan_fine;
@@ -1080,7 +1080,6 @@ public class Library {
             stmt = con.prepareStatement(template);
             
             stmt.setInt(1,lib.getLibrarian().getID());
-            stmt.setInt(2, lib.getLibrarian().officeNo);
             
             stmt.executeUpdate();  
             }

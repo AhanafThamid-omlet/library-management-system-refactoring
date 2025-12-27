@@ -236,8 +236,10 @@ public class Main
             if (books!=null)
             {
                 input = takeInput(-1,books.size());
-            
-                books.get(input).changeBookInfo();
+
+                Book selectedBook = books.get(input);
+                Book.BookUpdater updater = selectedBook.new BookUpdater();
+                updater.changeBookInfo(selectedBook);
             }
         }        
             
