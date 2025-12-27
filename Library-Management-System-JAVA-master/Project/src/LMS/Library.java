@@ -192,12 +192,7 @@ public class Library {
     {
         booksInLibrary.add(b);
     }
-    
-    //When this function is called, only the pointer of the book placed in booksInLibrary is removed. But the real object of book
-    //is still there in memory because pointers of that book placed in IssuedBooks and ReturnedBooks are still pointing to that book. And we
-    //are maintaining those pointers so that we can maintain history.
-    //But if we donot want to maintain history then we can delete those pointers placed in IssuedBooks and ReturnedBooks as well which are
-    //pointing to that book. In this way the book will be really removed from memory.
+
     public void removeBookfromLibrary(Book b)  
     {
         boolean delete = true;

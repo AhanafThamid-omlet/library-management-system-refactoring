@@ -6,10 +6,10 @@ import static LMS.Library.persons;
 
 public class Librarian extends Staff {
 
-    protected int officeNo;
+    private int officeNo;
     public static int currentOfficeNumber = 0;
 
-    // ✅ OCP policy (Strategy)
+    // OCP policy (Strategy)
     public static LibrarianAssignmentPolicy assignmentPolicy = new SingleLibrarianPolicy();
 
     public Librarian(int id, String n, String a, int p, double s, int of) {
@@ -29,13 +29,13 @@ public class Librarian extends Staff {
         System.out.println("Office Number: " + officeNo);
     }
 
-    // ✅ OCP: Strategy Interface
+    // OCP: Strategy Interface
     public static interface LibrarianAssignmentPolicy {
         boolean canAdd(Librarian lib);
         void onAdd(Librarian lib);
     }
 
-    // ✅ Default Policy: Only one librarian allowed
+    //  Default Policy: Only one librarian allowed
     public static class SingleLibrarianPolicy implements LibrarianAssignmentPolicy {
         public boolean canAdd(Librarian lib) {
             return Library.librarian == null;
@@ -48,7 +48,7 @@ public class Librarian extends Staff {
         }
     }
 
-    // ✅ OCP: add librarian through policy
+    // OCP: add librarian through policy
     public static boolean addLibrarian(Librarian lib) {
         if (assignmentPolicy.canAdd(lib)) {
             assignmentPolicy.onAdd(lib);
@@ -59,7 +59,7 @@ public class Librarian extends Staff {
         }
     }
 
-    // ✅ OCP: Change behavior without modifying code
+    // OCP: Change behavior without modifying code
     public static void setAssignmentPolicy(LibrarianAssignmentPolicy policy) {
         assignmentPolicy = policy;
     }

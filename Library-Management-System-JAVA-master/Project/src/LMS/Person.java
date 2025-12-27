@@ -3,11 +3,11 @@ package LMS;
 
 public abstract class Person 
 {   
-    protected int id;           // ID of every person related to library
-    protected String password;  // Password of every person related to library
-    protected String name;      // Name of every person related to library
-    protected String address;   // Address of every person related to library
-    protected int phoneNo;      // PhoneNo of every person related to library
+    protected int id;
+    protected String password;
+    protected String name;
+    protected String address;
+    protected int phoneNo;
     
     static int currentIdNumber = 0;     //This will be unique for every person, since it will be incremented when everytime
                                        //when a person is created

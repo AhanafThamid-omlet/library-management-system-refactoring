@@ -23,7 +23,7 @@ public class Clerk extends Staff {
         System.out.println("Desk Number: " + deskNo);
     }
 
-    // ✅ LSP applied
+    //  LSP applied
     @Override
     public PersonType getType() {
         return PersonType.CLERK;

@@ -120,6 +120,10 @@ public class Loan
             }
         }
     }
+    public void payFine() {
+        FineService fineService = new FineService();
+        fineService.processFinePayment(this);
+    }
 
 
 

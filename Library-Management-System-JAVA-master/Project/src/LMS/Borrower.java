@@ -109,19 +109,12 @@ public class Borrower extends Person
             borrowedBooks = new ArrayList<>();
             onHoldBooks = new ArrayList<>();
         }
-        public void updateBorrowerInfo() {
-            String choice;
-            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Name?");
-            if (choice.equals("y")) setName(inputHandler.readLine("Type New Name:"));
 
-            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Address?");
-            if (choice.equals("y")) setAddress(inputHandler.readLine("Type New Address:"));
+        public void updateName(String newName) { setName(newName); }
 
-            choice = inputHandler.askYesNo("Do you want to update " + getName() + "'s Phone Number?");
-            if (choice.equals("y")) setPhone(inputHandler.readInt("Type New Phone Number:"));
+        public void updateAddress(String newAddress) { setAddress(newAddress); }
 
-            System.out.println("\nBorrower is successfully updated.");
-        }
+        public void updatePhone(String newPhone) { setPhone(newPhone); }
     }
 
 
