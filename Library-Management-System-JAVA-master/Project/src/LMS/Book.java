@@ -1,34 +1,49 @@
 package LMS;
 
-import java.io.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-public class Book {
+public class Book implements Subject {
 
     private int bookID;
     private BookInfo bookInfo;
     private boolean isIssued;
 
     private HoldRequestOperations holdRequestsOperations = new HoldRequestOperations();
+    private List<Observer> observers = new ArrayList<>();
 
     static int currentIdNumber = 0;
 
-    //  Constructor using BookInfo (only ONE)
     public Book(int id, BookInfo info, boolean issued) {
         this.bookID = (id == -1) ? ++currentIdNumber : id;
-        this.title = info.getTitle();
-        this.subject = info.getSubject();
-        this.author = info.getAuthor();
+        this.bookInfo = info;
         this.isIssued = issued;
     }
 
-    //  Constructor with direct parameters (calls BookInfo constructor)
     public Book(int id, String t, String s, String a, boolean issued) {
         this(id, new BookInfo(t, s, a), issued);
     }
 
-    // Print hold requests
+    // ✅ Observer Pattern methods
+    @Override
+    public void addObserver(Observer o) {
+        if (!observers.contains(o))
+            observers.add(o);
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers(String message) {
+        for (Observer o : observers) {
+            o.update(message);
+        }
+    }
+
+    // ✅ Print hold requests
     public void printHoldRequests() {
         if (!holdRequestsOperations.holdRequests.isEmpty()) {
             System.out.println("\nHold Requests are: ");
@@ -39,41 +54,37 @@ public class Book {
 
             for (int i = 0; i < holdRequestsOperations.holdRequests.size(); i++) {
                 System.out.print(i + "-" + "\t\t");
-                holdRequestsOperations.printRequests();
+                holdRequestsOperations.holdRequests.get(i).print();
             }
-        } else
+        } else {
             System.out.println("\nNo Hold Requests.");
+        }
     }
 
-    // Print book info
     public void printInfo() {
-        System.out.println(title + "\t\t\t" + author + "\t\t\t" + subject);
+        System.out.println(getTitle() + "\t\t\t" + getAuthor() + "\t\t\t" + getSubject());
     }
 
-    //  Setter methods (needed for updating)
+    // ✅ Setters update BookInfo
     public void setAuthor(String author) {
-        this.author = author;
+        this.bookInfo.setAuthor(author);
     }
 
     public void setSubject(String subject) {
-        this.subject = subject;
+        this.bookInfo.setSubject(subject);
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.bookInfo.setTitle(title);
     }
 
-    // Getter methods
-    public String getTitle() { return title; }
-
-    public String getSubject() { return subject; }
-
-    public String getAuthor() { return author; }
+    // ✅ Getters
+    public String getTitle() { return bookInfo.getTitle(); }
+    public String getSubject() { return bookInfo.getSubject(); }
+    public String getAuthor() { return bookInfo.getAuthor(); }
 
     public boolean getIssuedStatus() { return isIssued; }
-
     public void setIssuedStatus(boolean s) { isIssued = s; }
-
     public int getID() { return bookID; }
 
     public ArrayList<HoldRequest> getHoldRequests() {
@@ -84,22 +95,25 @@ public class Book {
         currentIdNumber = n;
     }
 
-    //  Place book on hold
+    // ✅ Place book on hold (borrower becomes observer)
     public void placeBookOnHold(Borrower bor) {
         HoldRequest hr = new HoldRequest(bor, this, new Date());
 
         holdRequestsOperations.addHoldRequest(hr);
         bor.addHoldRequest(hr);
 
-        System.out.println("\nThe book " + title + " has been successfully placed on hold by borrower " + bor.getName() + ".\n");
+        // ✅ add observer
+        addObserver(bor);
+
+        System.out.println("\nThe book " + getTitle() + " has been placed on hold by borrower " + bor.getName() + ".\n");
     }
 
-    //  Make hold request
+    // ✅ Make hold request
     public void makeHoldRequest(Borrower borrower) {
 
         for (int i = 0; i < borrower.getBorrowedBooks().size(); i++) {
             if (borrower.getBorrowedBooks().get(i).getBook() == this) {
-                System.out.println("\nYou have already borrowed " + title);
+                System.out.println("\nYou have already borrowed " + getTitle());
                 return;
             }
         }
@@ -114,13 +128,16 @@ public class Book {
         placeBookOnHold(borrower);
     }
 
-    //  Service hold request
+    // ✅ Service hold request
     public void serviceHoldRequest(HoldRequest hr) {
         holdRequestsOperations.removeHoldRequest();
         hr.getBorrower().removeHoldRequest(hr);
+
+        // ✅ remove observer after request processed
+        removeObserver(hr.getBorrower());
     }
 
-    // Issue a book
+    // ✅ Issue book
     public void issueBook(Borrower borrower, Staff staff) {
 
         Date today = new Date();
@@ -135,11 +152,14 @@ public class Book {
             if (days > Library.getInstance().getHoldRequestExpiry()) {
                 holdRequestsOperations.removeHoldRequest();
                 hr.getBorrower().removeHoldRequest(hr);
+
+                // ✅ remove observer if expired
+                removeObserver(hr.getBorrower());
             }
         }
 
         if (isIssued) {
-            System.out.println("\nThe book " + title + " is already issued.");
+            System.out.println("\nThe book " + getTitle() + " is already issued.");
             System.out.println("Would you like to place the book on hold? (y/n)");
 
             Scanner sc = new Scanner(System.in);
@@ -151,57 +171,46 @@ public class Book {
             return;
         }
 
+        // ✅ If holds exist → only first borrower gets notification
         if (!holdRequestsOperations.holdRequests.isEmpty()) {
-            boolean hasRequest = false;
+            Borrower firstBorrower = holdRequestsOperations.holdRequests.get(0).getBorrower();
 
-            for (int i = 0; i < holdRequestsOperations.holdRequests.size() && !hasRequest; i++) {
-                if (holdRequestsOperations.holdRequests.get(i).getBorrower() == borrower)
-                    hasRequest = true;
-            }
-
-            if (hasRequest) {
-                if (holdRequestsOperations.holdRequests.get(0).getBorrower() == borrower)
-                    serviceHoldRequest(holdRequestsOperations.holdRequests.get(0));
-                else {
-                    System.out.println("\nSorry some other users have requested for this book earlier than you.");
-                    return;
-                }
-            } else {
-                System.out.println("\nSome users have already placed this book on request and you haven't.");
-                System.out.println("Would you like to place the book on hold? (y/n)");
-
-                Scanner sc = new Scanner(System.in);
-                String choice = sc.next();
-
-                if (choice.equalsIgnoreCase("y")) {
-                    makeHoldRequest(borrower);
-                }
+            if (borrower != firstBorrower) {
+                System.out.println("\nSorry, someone else requested earlier. Wait for your turn.");
                 return;
             }
+
+            serviceHoldRequest(holdRequestsOperations.holdRequests.get(0));
         }
 
-        // Issue
+        // ✅ Issue
         setIssuedStatus(true);
 
-        Loan iHistory = new Loan(borrower, this, staff, null, new Date(), null, false);
-        Library.getInstance().addLoan(iHistory);
-        borrower.addBorrowedBook(iHistory);
+        Loan loan = new Loan(borrower, this, staff, null, new Date(), null, false);
+        Library.getInstance().addLoan(loan);
+        borrower.addBorrowedBook(loan);
 
-        System.out.println("\nThe book " + title + " is successfully issued to " + borrower.getName() + ".");
+        System.out.println("\nThe book " + getTitle() + " is successfully issued to " + borrower.getName() + ".");
         System.out.println("\nIssued by: " + staff.getName());
     }
 
-    // Return a book
+    // ✅ Return book + notify first observer
     public void returnBook(Borrower borrower, Loan l, Staff staff) {
-        l.getBook().setIssuedStatus(false);
+
+        setIssuedStatus(false);
         l.setReturnedDate(new Date());
         l.setReceiver(staff);
 
         borrower.removeBorrowedBook(l);
-
         l.payFine();
 
-        System.out.println("\nThe book " + l.getBook().getTitle() + " is successfully returned by " + borrower.getName() + ".");
+        System.out.println("\nThe book " + getTitle() + " is successfully returned by " + borrower.getName() + ".");
         System.out.println("\nReceived by: " + staff.getName());
+
+        // ✅ notify ONLY first borrower in hold queue (extra mark)
+        if (!holdRequestsOperations.holdRequests.isEmpty()) {
+            Borrower nextBorrower = holdRequestsOperations.holdRequests.get(0).getBorrower();
+            nextBorrower.update("Book '" + getTitle() + "' is now available! You are next in queue.");
+        }
     }
 }
